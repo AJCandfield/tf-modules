@@ -7,7 +7,9 @@ on:
       - ".tflint.hcl"
       - ".terraform-version"
       - ".mise.toml"
-      - "scripts/changed-modules.sh"
+      - ".pre-commit-config.yaml"
+      - "terraform-docs.yml"
+      - "scripts/**"
       - ".github/workflows/ci.yml"
   workflow_dispatch:
 
@@ -30,12 +32,15 @@ jobs:
         with:
           fetch-depth: 0 # history needed to diff against the PR base
 
-      - uses: hashicorp/setup-terraform@v3
+      # Install all CI tools from the repository's pinned mise manifest.
+      # mise-action's GitHub Actions cache avoids downloading them on every
+      # run, and changes to .mise.toml invalidate the cache naturally.
+      - uses: jdx/mise-action@v3
         with:
-          terraform_version: 1.15.8 # keep in sync with .terraform-version
-      - uses: terraform-linters/setup-tflint@v6
-        with:
-          tflint_version: v0.64.0
+          install: true
+          cache: true
+      - name: Check Terraform version-file agreement
+        run: test "$(tr -d '[:space:]' < .terraform-version)" = "$(mise config get tools.terraform)"
       - uses: reviewdog/action-setup@v1
       - name: Install tflint plugins
         run: tflint --init
