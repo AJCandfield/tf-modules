@@ -21,7 +21,7 @@ if ! git rev-parse --verify --quiet "$BASE" >/dev/null; then
   exit 0
 fi
 
-SHARED="$(git diff --name-only "$BASE"...HEAD -- .tflint.hcl .terraform-version .mise.toml scripts/ .github/)"
+SHARED="$(git diff --name-only "$BASE"...HEAD -- .tflint.hcl .terraform-version .mise.toml docker/ci/ scripts/ .github/)"
 if [ -n "$SHARED" ]; then
   echo "$ALL_MODULES"
   exit 0

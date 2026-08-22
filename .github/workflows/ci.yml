@@ -5,12 +5,10 @@ on:
     paths:
       - "modules/**"
       - ".tflint.hcl"
-      - ".mise.toml"
       - ".pre-commit-config.yaml"
       - "terraform-docs.yml"
       - "scripts/**"
-      - "Dockerfile"
-      - ".dockerignore"
+      - "docker/ci/**"
       - ".github/workflows/ci.yml"
       - ".github/workflows/toolchain-image.yml"
   workflow_dispatch:
