@@ -28,10 +28,12 @@ if [ -n "$SHARED" ]; then
 fi
 
 git diff --name-only "$BASE"...HEAD -- 'modules/*' \
-  | grep '^modules/' \
-  | cut -d/ -f1-3 \
+  | awk -F/ '/^modules\// {print $1 "/" $2 "/" $3}' \
   | sort -u \
   | while read -r module; do
       # Deleted modules have nothing left to check.
-      [ -d "$module" ] && echo "$module"
+      if [ -d "$module" ]; then
+        echo "$module"
+      fi
     done
+exit 0
