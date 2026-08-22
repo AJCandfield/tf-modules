@@ -9,11 +9,15 @@ on:
       - ".pre-commit-config.yaml"
       - "terraform-docs.yml"
       - "scripts/**"
+      - "Dockerfile"
+      - ".dockerignore"
       - ".github/workflows/ci.yml"
+      - ".github/workflows/toolchain-image.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
+  packages: read
 
 env:
   TF_IN_AUTOMATION: "true"
@@ -21,8 +25,14 @@ env:
 jobs:
   modules:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ajcandfield/tf-modules-ci:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       contents: read
+      packages: read
       security-events: write
       checks: write
       pull-requests: write
@@ -30,10 +40,6 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: jdx/mise-action@v3
-        with:
-          install: true
-          cache: true
       - uses: reviewdog/action-setup@v1
       - name: Install tflint plugins
         run: tflint --init
