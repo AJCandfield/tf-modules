@@ -1,0 +1,5 @@
+[tools]
+terraform = "1.15.8"
+tflint = "0.64.0"
+terraform-docs = "latest"
+pre-commit = "latest"

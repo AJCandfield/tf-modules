@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  pull_request:
+    paths:
+      - "modules/**"
+      - ".tflint.hcl"
+      - ".terraform-version"
+      - ".mise.toml"
+      - "scripts/changed-modules.sh"
+      - ".github/workflows/ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  modules:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # SARIF upload to code scanning
+      checks: write          # JUnit check run + reviewdog check
+      pull-requests: write   # reviewdog PR review comments, if reporter is switched
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # history needed to diff against the PR base
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.15.8 # keep in sync with .terraform-version
+      - uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.64.0
+      - uses: reviewdog/action-setup@v1
+      - name: Install tflint plugins
+        run: tflint --init
+
+      # Prints all modules when the base ref is missing or shared config
+      # (CI, tflint config, tool versions, the script itself) changed.
+      - name: Detect changed modules
+        id: changed
+        run: |
+          MODULES="$(scripts/changed-modules.sh "origin/${{ github.base_ref }}")"
+          echo "$MODULES"
+          {
+            echo 'modules<<EOF'
+            echo "$MODULES"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      # --force keeps the job green while comparing report formats; drop
+      # it (or set --minimum-failure-severity) once a format is chosen.
+      - name: Check changed modules
+        if: steps.changed.outputs.modules != ''
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p reports/sarif reports/junit reports/checkstyle
+          while IFS= read -r module; do
+            slug="${module//\//-}"
+            echo "::group::$module"
+            terraform fmt -check "$module"
+            terraform -chdir="$module" init -backend=false -input=false
+            terraform -chdir="$module" validate
+            tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
+              --format sarif --force > "reports/sarif/$slug.sarif"
+            tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
+              --format junit --force > "reports/junit/$slug.xml"
+            # Run from inside the module so reviewdog maps checkstyle
+            # paths to repo-relative locations.
+            (
+              cd "$module"
+              tflint --config="$GITHUB_WORKSPACE/.tflint.hcl" --format checkstyle --force \
+                | tee "$GITHUB_WORKSPACE/reports/checkstyle/$slug.xml" \
+                | reviewdog -f=checkstyle -name=tflint -reporter=github-check -fail-level=none
+            )
+            echo "::endgroup::"
+          done <<< "${{ steps.changed.outputs.modules }}"
+
+      # SARIF upload needs GitHub Advanced Security on private repos; keep
+      # it non-fatal during the format comparison.
+      - name: Upload SARIF to code scanning
+        if: steps.changed.outputs.modules != ''
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
+        with:
+          sarif_file: reports/sarif
+          category: tflint
+
+      - name: Publish JUnit reports
+        if: steps.changed.outputs.modules != ''
+        uses: dorny/test-reporter@v3
+        with:
+          name: tflint
+          path: reports/junit/*.xml
+          reporter: java-junit
+          fail_on_error: "false"
+          fail_on_empty: "false"
+
+      - name: Upload raw reports
+        if: steps.changed.outputs.modules != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: tflint-reports
+          path: reports/
+          retention-days: 14
