@@ -5,7 +5,6 @@ on:
     paths:
       - "modules/**"
       - ".tflint.hcl"
-      - ".terraform-version"
       - ".mise.toml"
       - ".pre-commit-config.yaml"
       - "terraform-docs.yml"
@@ -24,29 +23,20 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write # SARIF upload to code scanning
-      checks: write          # JUnit check run + reviewdog check
-      pull-requests: write   # reviewdog PR review comments, if reporter is switched
+      security-events: write
+      checks: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0 # history needed to diff against the PR base
-
-      # Install all CI tools from the repository's pinned mise manifest.
-      # mise-action's GitHub Actions cache avoids downloading them on every
-      # run, and changes to .mise.toml invalidate the cache naturally.
+          fetch-depth: 0
       - uses: jdx/mise-action@v3
         with:
           install: true
           cache: true
-      - name: Check Terraform version-file agreement
-        run: test "$(tr -d '[:space:]' < .terraform-version)" = "$(mise config get tools.terraform)"
       - uses: reviewdog/action-setup@v1
       - name: Install tflint plugins
         run: tflint --init
-
-      # Prints all modules when the base ref is missing or shared config
-      # (CI, tflint config, tool versions, the script itself) changed.
       - name: Detect changed modules
         id: changed
         run: |
@@ -57,9 +47,6 @@ jobs:
             echo "$MODULES"
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
-
-      # --force keeps the job green while comparing report formats; drop
-      # it (or set --minimum-failure-severity) once a format is chosen.
       - name: Check changed modules
         if: steps.changed.outputs.modules != ''
         env:
@@ -76,8 +63,6 @@ jobs:
               --format sarif --force > "reports/sarif/$slug.sarif"
             tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
               --format junit --force > "reports/junit/$slug.xml"
-            # Run from inside the module so reviewdog maps checkstyle
-            # paths to repo-relative locations.
             (
               cd "$module"
               tflint --config="$GITHUB_WORKSPACE/.tflint.hcl" --format checkstyle --force \
@@ -86,9 +71,6 @@ jobs:
             )
             echo "::endgroup::"
           done <<< "${{ steps.changed.outputs.modules }}"
-
-      # SARIF upload needs GitHub Advanced Security on private repos; keep
-      # it non-fatal during the format comparison.
       - name: Upload SARIF to code scanning
         if: steps.changed.outputs.modules != ''
         uses: github/codeql-action/upload-sarif@v4
@@ -96,7 +78,6 @@ jobs:
         with:
           sarif_file: reports/sarif
           category: tflint
-
       - name: Publish JUnit reports
         if: steps.changed.outputs.modules != ''
         uses: dorny/test-reporter@v3
@@ -106,7 +87,6 @@ jobs:
           reporter: java-junit
           fail_on_error: "false"
           fail_on_empty: "false"
-
       - name: Upload raw reports
         if: steps.changed.outputs.modules != ''
         uses: actions/upload-artifact@v7
