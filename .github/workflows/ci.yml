@@ -30,6 +30,9 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    defaults:
+      run:
+        shell: bash
     permissions:
       contents: read
       packages: read
