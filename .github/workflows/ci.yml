@@ -9,11 +9,15 @@ on:
       - ".pre-commit-config.yaml"
       - "terraform-docs.yml"
       - "scripts/**"
+      - "Dockerfile"
+      - ".dockerignore"
       - ".github/workflows/ci.yml"
+      - ".github/workflows/toolchain-image.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
+  packages: read
 
 env:
   TF_IN_AUTOMATION: "true"
@@ -21,20 +25,25 @@ env:
 jobs:
   modules:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ajcandfield/tf-modules-ci:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    defaults:
+      run:
+        shell: bash
     permissions:
       contents: read
+      packages: read
       security-events: write
       checks: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: jdx/mise-action@v3
-        with:
-          install: true
-          cache: true
-      - uses: reviewdog/action-setup@v1
+      - name: Configure Git safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Install tflint plugins
         run: tflint --init
       - name: Detect changed modules
@@ -49,8 +58,6 @@ jobs:
           } >> "$GITHUB_OUTPUT"
       - name: Check changed modules
         if: steps.changed.outputs.modules != ''
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p reports/sarif reports/junit reports/checkstyle
           while IFS= read -r module; do
@@ -63,12 +70,8 @@ jobs:
               --format sarif --force > "reports/sarif/$slug.sarif"
             tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
               --format junit --force > "reports/junit/$slug.xml"
-            (
-              cd "$module"
-              tflint --config="$GITHUB_WORKSPACE/.tflint.hcl" --format checkstyle --force \
-                | tee "$GITHUB_WORKSPACE/reports/checkstyle/$slug.xml" \
-                | reviewdog -f=checkstyle -name=tflint -reporter=github-check -fail-level=none
-            )
+            tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
+              --format checkstyle --force > "reports/checkstyle/$slug.xml"
             echo "::endgroup::"
           done <<< "${{ steps.changed.outputs.modules }}"
       - name: Upload SARIF to code scanning
