@@ -24,7 +24,7 @@ jobs:
   modules:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/ajcandfield/tf-modules-ci:latest
+      image: ghcr.io/ajcandfield/tf-modules/ci:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
