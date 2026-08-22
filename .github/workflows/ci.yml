@@ -35,14 +35,12 @@ jobs:
       packages: read
       security-events: write
       checks: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Configure Git safe directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - uses: reviewdog/action-setup@v1
       - name: Install tflint plugins
         run: tflint --init
       - name: Detect changed modules
@@ -57,8 +55,6 @@ jobs:
           } >> "$GITHUB_OUTPUT"
       - name: Check changed modules
         if: steps.changed.outputs.modules != ''
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p reports/sarif reports/junit reports/checkstyle
           while IFS= read -r module; do
@@ -71,12 +67,8 @@ jobs:
               --format sarif --force > "reports/sarif/$slug.sarif"
             tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
               --format junit --force > "reports/junit/$slug.xml"
-            (
-              cd "$module"
-              tflint --config="$GITHUB_WORKSPACE/.tflint.hcl" --format checkstyle --force \
-                | tee "$GITHUB_WORKSPACE/reports/checkstyle/$slug.xml" \
-                | reviewdog -f=checkstyle -name=tflint -reporter=github-check -fail-level=none
-            )
+            tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
+              --format checkstyle --force > "reports/checkstyle/$slug.xml"
             echo "::endgroup::"
           done <<< "${{ steps.changed.outputs.modules }}"
       - name: Upload SARIF to code scanning
