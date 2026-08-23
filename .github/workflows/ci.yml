@@ -57,6 +57,7 @@ jobs:
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
       - name: Check changed modules
+        id: check
         if: steps.changed.outputs.modules != ''
         run: |
           mkdir -p reports/sarif reports/junit reports/checkstyle
@@ -79,9 +80,7 @@ jobs:
             fi
             echo "::endgroup::"
           done <<< "${{ steps.changed.outputs.modules }}"
-          if [ "$lint_failed" -ne 0 ]; then
-            exit 1
-          fi
+          echo "lint_failed=$lint_failed" >> "$GITHUB_OUTPUT"
       - name: Upload SARIF to code scanning
         if: steps.changed.outputs.modules != ''
         uses: github/codeql-action/upload-sarif@v4
@@ -105,3 +104,6 @@ jobs:
           name: tflint-reports
           path: reports/
           retention-days: 14
+      - name: Enforce TFLint findings
+        if: steps.changed.outputs.modules != '' && steps.check.outputs.lint_failed == '1'
+        run: exit 1
