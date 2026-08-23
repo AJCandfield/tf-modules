@@ -56,6 +56,12 @@ variable "allow_rebase_merge" {
   default = false
 }
 
+variable "allow_auto_merge" {
+  description = "Allow pull requests to be merged automatically when branch protection requirements are met."
+  type        = bool
+  default     = true
+}
+
 variable "delete_branch_on_merge" {
   type    = bool
   default = true

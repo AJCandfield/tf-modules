@@ -11,6 +11,7 @@ resource "github_repository" "this" {
   allow_squash_merge     = var.allow_squash_merge
   allow_merge_commit     = var.allow_merge_commit
   allow_rebase_merge     = var.allow_rebase_merge
+  allow_auto_merge       = var.allow_auto_merge
   delete_branch_on_merge = var.delete_branch_on_merge
   auto_init              = false
 
@@ -21,5 +22,16 @@ resource "github_repository" "this" {
     secret_scanning_push_protection {
       status = var.secret_scanning_push_protection ? "enabled" : "disabled"
     }
+  }
+}
+
+resource "github_branch_protection" "main" {
+  repository_id  = github_repository.this.node_id
+  pattern        = "main"
+  enforce_admins = true
+
+  required_pull_request_reviews {
+    required_approving_review_count = 1
+    dismiss_stale_reviews           = true
   }
 }
