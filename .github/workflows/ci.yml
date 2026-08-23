@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - "modules/**"
+      - ".mise.toml"
       - ".tflint.hcl"
       - ".pre-commit-config.yaml"
       - "terraform-docs.yml"
       - "scripts/**"
       - "docker/ci/**"
+      - "renovate.json"
       - ".github/workflows/ci.yml"
       - ".github/workflows/toolchain-image.yml"
   workflow_dispatch:
@@ -24,7 +26,7 @@ jobs:
   modules:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/ajcandfield/tf-modules/ci:latest
+      image: ghcr.io/ajcandfield/tf-modules/ci@sha256:07f9ce96b46cd8c02d7fd79212d3dc5113473d961a1e1348e2881148da0466fa
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -58,6 +60,7 @@ jobs:
         if: steps.changed.outputs.modules != ''
         run: |
           mkdir -p reports/sarif reports/junit reports/checkstyle
+          lint_failed=0
           while IFS= read -r module; do
             slug="${module//\//-}"
             echo "::group::$module"
@@ -70,8 +73,15 @@ jobs:
               --format junit --force > "reports/junit/$slug.xml"
             tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
               --format checkstyle --force > "reports/checkstyle/$slug.xml"
+            if ! tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
+              --format compact; then
+              lint_failed=1
+            fi
             echo "::endgroup::"
           done <<< "${{ steps.changed.outputs.modules }}"
+          if [ "$lint_failed" -ne 0 ]; then
+            exit 1
+          fi
       - name: Upload SARIF to code scanning
         if: steps.changed.outputs.modules != ''
         uses: github/codeql-action/upload-sarif@v4
