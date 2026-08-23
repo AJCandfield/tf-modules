@@ -32,14 +32,16 @@ No modules.
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_allow_auto_merge"></a> [allow\_auto\_merge](#input\_allow\_auto\_merge) | Allow pull requests to be merged automatically when branch protection requirements are met. | `bool` | `true` | no |
-| <a name="input_allow_merge_commit"></a> [allow\_merge\_commit](#input\_allow\_merge\_commit) | n/a | `bool` | `false` | no |
-| <a name="input_allow_rebase_merge"></a> [allow\_rebase\_merge](#input\_allow\_rebase\_merge) | n/a | `bool` | `false` | no |
-| <a name="input_allow_squash_merge"></a> [allow\_squash\_merge](#input\_allow\_squash\_merge) | n/a | `bool` | `true` | no |
-| <a name="input_delete_branch_on_merge"></a> [delete\_branch\_on\_merge](#input\_delete\_branch\_on\_merge) | n/a | `bool` | `true` | no |
+| <a name="input_allow_merge_commit"></a> [allow\_merge\_commit](#input\_allow\_merge\_commit) | Allow pull requests to be merged with a merge commit. | `bool` | `false` | no |
+| <a name="input_allow_rebase_merge"></a> [allow\_rebase\_merge](#input\_allow\_rebase\_merge) | Allow pull requests to be merged with a rebase merge. | `bool` | `false` | no |
+| <a name="input_allow_squash_merge"></a> [allow\_squash\_merge](#input\_allow\_squash\_merge) | Allow pull requests to be merged with a squash merge. | `bool` | `true` | no |
+| <a name="input_delete_branch_on_merge"></a> [delete\_branch\_on\_merge](#input\_delete\_branch\_on\_merge) | Automatically delete the head branch after a pull request is merged. | `bool` | `true` | no |
 | <a name="input_description"></a> [description](#input\_description) | Repository description. | `string` | `null` | no |
-| <a name="input_has_issues"></a> [has\_issues](#input\_has\_issues) | n/a | `bool` | `true` | no |
-| <a name="input_has_projects"></a> [has\_projects](#input\_has\_projects) | n/a | `bool` | `false` | no |
-| <a name="input_has_wiki"></a> [has\_wiki](#input\_has\_wiki) | n/a | `bool` | `false` | no |
+| <a name="input_has_discussions"></a> [has\_discussions](#input\_has\_discussions) | Enable GitHub Discussions for the repository. | `bool` | `false` | no |
+| <a name="input_has_downloads"></a> [has\_downloads](#input\_has\_downloads) | Enable the repository downloads feature. | `bool` | `false` | no |
+| <a name="input_has_issues"></a> [has\_issues](#input\_has\_issues) | Enable GitHub Issues. | `bool` | `true` | no |
+| <a name="input_has_projects"></a> [has\_projects](#input\_has\_projects) | Enable GitHub Projects for the repository. | `bool` | `false` | no |
+| <a name="input_has_wiki"></a> [has\_wiki](#input\_has\_wiki) | Enable the repository wiki. | `bool` | `false` | no |
 | <a name="input_name"></a> [name](#input\_name) | Repository name. | `string` | n/a | yes |
 | <a name="input_secret_scanning"></a> [secret\_scanning](#input\_secret\_scanning) | Enable GitHub secret scanning where supported. | `bool` | `true` | no |
 | <a name="input_secret_scanning_push_protection"></a> [secret\_scanning\_push\_protection](#input\_secret\_scanning\_push\_protection) | Block pushes containing detected secrets where supported. | `bool` | `true` | no |

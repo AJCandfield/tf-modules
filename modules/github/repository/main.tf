@@ -4,9 +4,11 @@ resource "github_repository" "this" {
   visibility  = var.visibility
   topics      = sort(tolist(var.topics))
 
-  has_issues   = var.has_issues
-  has_projects = var.has_projects
-  has_wiki     = var.has_wiki
+  has_issues      = var.has_issues
+  has_projects    = var.has_projects
+  has_wiki        = var.has_wiki
+  has_discussions = var.has_discussions
+  has_downloads   = var.has_downloads
 
   allow_squash_merge     = var.allow_squash_merge
   allow_merge_commit     = var.allow_merge_commit

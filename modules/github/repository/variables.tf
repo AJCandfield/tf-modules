@@ -27,33 +27,51 @@ variable "topics" {
 }
 
 variable "has_issues" {
-  type    = bool
-  default = true
+  description = "Enable GitHub Issues."
+  type        = bool
+  default     = true
 }
 
 variable "has_projects" {
-  type    = bool
-  default = false
+  description = "Enable GitHub Projects for the repository."
+  type        = bool
+  default     = false
 }
 
 variable "has_wiki" {
-  type    = bool
-  default = false
+  description = "Enable the repository wiki."
+  type        = bool
+  default     = false
+}
+
+variable "has_discussions" {
+  description = "Enable GitHub Discussions for the repository."
+  type        = bool
+  default     = false
+}
+
+variable "has_downloads" {
+  description = "Enable the repository downloads feature."
+  type        = bool
+  default     = false
 }
 
 variable "allow_squash_merge" {
-  type    = bool
-  default = true
+  description = "Allow pull requests to be merged with a squash merge."
+  type        = bool
+  default     = true
 }
 
 variable "allow_merge_commit" {
-  type    = bool
-  default = false
+  description = "Allow pull requests to be merged with a merge commit."
+  type        = bool
+  default     = false
 }
 
 variable "allow_rebase_merge" {
-  type    = bool
-  default = false
+  description = "Allow pull requests to be merged with a rebase merge."
+  type        = bool
+  default     = false
 }
 
 variable "allow_auto_merge" {
@@ -63,8 +81,9 @@ variable "allow_auto_merge" {
 }
 
 variable "delete_branch_on_merge" {
-  type    = bool
-  default = true
+  description = "Automatically delete the head branch after a pull request is merged."
+  type        = bool
+  default     = true
 }
 
 variable "secret_scanning" {
