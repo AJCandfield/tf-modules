@@ -50,12 +50,6 @@ variable "has_discussions" {
   default     = false
 }
 
-variable "has_downloads" {
-  description = "Enable the repository downloads feature."
-  type        = bool
-  default     = false
-}
-
 variable "allow_squash_merge" {
   description = "Allow pull requests to be merged with a squash merge."
   type        = bool
