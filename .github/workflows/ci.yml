@@ -11,8 +11,7 @@ on:
       - "scripts/**"
       - "docker/ci/**"
       - "renovate.json"
-      - ".github/workflows/ci.yml"
-      - ".github/workflows/toolchain-image.yml"
+      - ".github/workflows/**"
   workflow_dispatch:
 
 permissions:
