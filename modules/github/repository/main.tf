@@ -35,4 +35,21 @@ resource "github_branch_protection" "main" {
     required_approving_review_count = 0
     dismiss_stale_reviews           = true
   }
+
+  dynamic "required_status_checks" {
+    for_each = length(var.required_status_checks) == 0 ? [] : [var.required_status_checks]
+
+    content {
+      strict   = false
+      contexts = required_status_checks.value
+    }
+  }
+}
+
+resource "github_actions_secret" "this" {
+  for_each = nonsensitive(toset(keys(var.actions_secrets)))
+
+  repository      = github_repository.this.name
+  secret_name     = each.value
+  plaintext_value = var.actions_secrets[each.value]
 }

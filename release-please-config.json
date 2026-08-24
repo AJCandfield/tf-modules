@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "separate-pull-requests": true,
+  "pull-request-title-pattern": "chore(release): release${component} ${version}",
+  "packages": {
+    "modules/github/repository": {
+      "release-type": "terraform-module",
+      "component": "github/repository",
+      "include-component-in-tag": true,
+      "tag-separator": "-"
+    },
+    "modules/gitlab/project": {
+      "release-type": "terraform-module",
+      "component": "gitlab/project",
+      "include-component-in-tag": true,
+      "tag-separator": "-"
+    }
+  }
+}

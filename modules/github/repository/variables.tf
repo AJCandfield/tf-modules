@@ -91,3 +91,16 @@ variable "secret_scanning_push_protection" {
   type        = bool
   default     = true
 }
+
+variable "required_status_checks" {
+  description = "Status-check contexts required before pull requests can merge into main."
+  type        = set(string)
+  default     = []
+}
+
+variable "actions_secrets" {
+  description = "GitHub Actions secrets to manage for the repository."
+  type        = map(string)
+  default     = {}
+  sensitive   = true
+}
