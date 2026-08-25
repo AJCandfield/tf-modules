@@ -36,7 +36,6 @@ jobs:
       contents: read
       packages: read
       security-events: write
-      checks: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -59,7 +58,7 @@ jobs:
         id: check
         if: steps.changed.outputs.modules != ''
         run: |
-          mkdir -p reports/sarif reports/junit reports/checkstyle
+          mkdir -p reports/sarif reports/checkstyle
           lint_failed=0
           while IFS= read -r module; do
             slug="${module//\//-}"
@@ -69,8 +68,6 @@ jobs:
             terraform -chdir="$module" validate
             tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
               --format sarif --force > "reports/sarif/$slug.sarif"
-            tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
-              --format junit --force > "reports/junit/$slug.xml"
             tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
               --format checkstyle --force > "reports/checkstyle/$slug.xml"
             if ! tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
@@ -87,15 +84,6 @@ jobs:
         with:
           sarif_file: reports/sarif
           category: tflint
-      - name: Publish JUnit reports
-        if: steps.changed.outputs.modules != ''
-        uses: dorny/test-reporter@v3
-        with:
-          name: tflint
-          path: reports/junit/*.xml
-          reporter: java-junit
-          fail_on_error: "false"
-          fail_on_empty: "false"
       - name: Upload raw reports
         if: steps.changed.outputs.modules != ''
         uses: actions/upload-artifact@v7
