@@ -23,14 +23,12 @@ jobs:
           types: |
             feat
             fix
-            ci
             chore
             docs
-            refactor
           scopes: |
             github/.*
             gitlab/.*
             deps
             ci
             release
-          requireScope: true
+          requireScope: false
