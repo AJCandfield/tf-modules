@@ -48,7 +48,7 @@ No modules.
 | <a name="input_secret_scanning"></a> [secret\_scanning](#input\_secret\_scanning) | Enable GitHub secret scanning where supported. | `bool` | `true` | no |
 | <a name="input_secret_scanning_push_protection"></a> [secret\_scanning\_push\_protection](#input\_secret\_scanning\_push\_protection) | Block pushes containing detected secrets where supported. | `bool` | `true` | no |
 | <a name="input_topics"></a> [topics](#input\_topics) | Topics to apply to the repository. | `set(string)` | `[]` | no |
-| <a name="input_visibility"></a> [visibility](#input\_visibility) | Repository visibility. | `string` | `"public"` | no |
+| <a name="input_visibility"></a> [visibility](#input\_visibility) | Repository visibility. | `string` | `"private"` | no |
 
 ## Outputs
 
