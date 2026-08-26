@@ -12,7 +12,7 @@ variable "description" {
 variable "visibility" {
   description = "Repository visibility."
   type        = string
-  default     = "public"
+  default     = "private"
 
   validation {
     condition     = contains(["public", "private", "internal"], var.visibility)
