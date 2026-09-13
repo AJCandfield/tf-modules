@@ -29,7 +29,7 @@ variable "topics" {
 variable "has_issues" {
   description = "Enable GitHub Issues."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "has_projects" {

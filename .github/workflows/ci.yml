@@ -64,6 +64,7 @@ jobs:
             terraform-docs --config "$GITHUB_WORKSPACE/terraform-docs.yml" --output-check "$module"
             terraform -chdir="$module" init -backend=false -input=false
             terraform -chdir="$module" validate
+            terraform -chdir="$module" test
             if ! tflint --chdir="$module" --config="$GITHUB_WORKSPACE/.tflint.hcl" \
               --format compact; then
               lint_failed=1
