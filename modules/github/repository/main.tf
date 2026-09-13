@@ -14,7 +14,7 @@ resource "github_repository" "this" {
   allow_rebase_merge     = var.allow_rebase_merge
   allow_auto_merge       = var.allow_auto_merge
   delete_branch_on_merge = var.delete_branch_on_merge
-  auto_init              = false
+  auto_init              = true
 
   security_and_analysis {
     secret_scanning {
@@ -24,11 +24,20 @@ resource "github_repository" "this" {
       status = var.secret_scanning_push_protection ? "enabled" : "disabled"
     }
   }
+
+  lifecycle {
+    ignore_changes = [auto_init]
+  }
+}
+
+resource "github_branch_default" "main" {
+  repository = github_repository.this.name
+  branch     = "main"
 }
 
 resource "github_branch_protection" "main" {
   repository_id  = github_repository.this.node_id
-  pattern        = "main"
+  pattern        = github_branch_default.main.branch
   enforce_admins = true
 
   required_pull_request_reviews {

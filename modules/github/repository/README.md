@@ -1,6 +1,6 @@
 # repository module
 
-Creates and configures a GitHub repository with portfolio defaults, topics, merge policy, and secret scanning settings.
+Creates and configures a GitHub repository with portfolio defaults, topics, merge policy, and secret scanning settings. The GitHub owner must initialize new repositories with a branch named `main`; existing repositories must already contain `main` before adopting this module version.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -25,6 +25,7 @@ No modules.
 | Name | Type |
 | ---- | ---- |
 | [github_actions_secret.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_secret) | resource |
+| [github_branch_default.main](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/branch_default) | resource |
 | [github_branch_protection.main](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/branch_protection) | resource |
 | [github_repository.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository) | resource |
 
@@ -40,7 +41,7 @@ No modules.
 | <a name="input_delete_branch_on_merge"></a> [delete\_branch\_on\_merge](#input\_delete\_branch\_on\_merge) | Automatically delete the head branch after a pull request is merged. | `bool` | `true` | no |
 | <a name="input_description"></a> [description](#input\_description) | Repository description. | `string` | `null` | no |
 | <a name="input_has_discussions"></a> [has\_discussions](#input\_has\_discussions) | Enable GitHub Discussions for the repository. | `bool` | `false` | no |
-| <a name="input_has_issues"></a> [has\_issues](#input\_has\_issues) | Enable GitHub Issues. | `bool` | `true` | no |
+| <a name="input_has_issues"></a> [has\_issues](#input\_has\_issues) | Enable GitHub Issues. | `bool` | `false` | no |
 | <a name="input_has_projects"></a> [has\_projects](#input\_has\_projects) | Enable GitHub Projects for the repository. | `bool` | `false` | no |
 | <a name="input_has_wiki"></a> [has\_wiki](#input\_has\_wiki) | Enable the repository wiki. | `bool` | `false` | no |
 | <a name="input_name"></a> [name](#input\_name) | Repository name. | `string` | n/a | yes |
